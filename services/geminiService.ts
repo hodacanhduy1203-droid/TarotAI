@@ -6,11 +6,15 @@ export const interpretReading = async (
   drawnCards: DrawnCard[]
 ): Promise<ReadableStream<string>> => {
   try {
-    // Priority: 1. User selected key (API_KEY) 2. System provided key (GEMINI_API_KEY)
-    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+    // Priority: 
+    // 1. Manually entered key in localStorage (for custom domains like Vercel)
+    // 2. User selected key (API_KEY from AI Studio)
+    // 3. System provided key (GEMINI_API_KEY)
+    const manualKey = typeof window !== 'undefined' ? localStorage.getItem('MANUAL_GEMINI_API_KEY') : null;
+    const apiKey = manualKey || process.env.API_KEY || process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
-      throw new Error('Chưa có API Key. Vui lòng kết nối tài khoản Google của bạn.');
+      throw new Error('Chưa có API Key. Vui lòng kết nối tài khoản Google hoặc nhập Key cá nhân.');
     }
 
     const ai = new GoogleGenAI({ apiKey });

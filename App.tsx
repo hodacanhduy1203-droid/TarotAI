@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isMobileUserAgent, setIsMobileUserAgent] = useState(false);
   const [hasSelectedKey, setHasSelectedKey] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   
   // Track the most recently revealed card to show its meaning immediately
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null);
@@ -44,9 +45,19 @@ const App: React.FC = () => {
     setIsStandalone(isStandaloneMode);
 
     const checkKeyStatus = async () => {
+      // 1. Check logic for AI Studio Applet
       if ((window as any).aistudio?.hasSelectedApiKey) {
         const selected = await (window as any).aistudio.hasSelectedApiKey();
-        setHasSelectedKey(selected);
+        if (selected) {
+          setHasSelectedKey(true);
+          return;
+        }
+      }
+
+      // 2. Check logic for Custom Domains (Vercel, etc)
+      const manualKey = localStorage.getItem('MANUAL_GEMINI_API_KEY');
+      if (manualKey) {
+        setHasSelectedKey(true);
       }
     };
     checkKeyStatus();
@@ -82,9 +93,77 @@ const App: React.FC = () => {
       // Guidance: proceed as if successful
       setHasSelectedKey(true);
     } else {
-      // Fallback for direct browser: explain it's for AI Studio applet mode
-      alert("Tính năng này hoạt động tốt nhất khi dùng trong Google AI Studio Applet.");
+      // Fallback for direct browser / custom domain (Vercel)
+      setShowApiKeyModal(true);
     }
+  };
+
+  const ApiKeyModal = () => {
+    const [keyInput, setKeyInput] = useState(localStorage.getItem('MANUAL_GEMINI_API_KEY') || '');
+    
+    const handleSaveKey = () => {
+      if (keyInput.trim()) {
+        localStorage.setItem('MANUAL_GEMINI_API_KEY', keyInput.trim());
+        setHasSelectedKey(true);
+        setShowApiKeyModal(false);
+      } else {
+        localStorage.removeItem('MANUAL_GEMINI_API_KEY');
+        setHasSelectedKey(false);
+        setShowApiKeyModal(false);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 animate-fadeIn backdrop-blur-md">
+        <div className="bg-mystic-900 border border-mystic-700 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+          <button 
+            onClick={() => setShowApiKeyModal(false)}
+            className="absolute top-4 right-4 text-mystic-400 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <h3 className="text-xl font-serif font-bold text-mystic-accent mb-4 flex items-center gap-2">
+            <Key className="w-5 h-5" /> Kết nối Gemini cá nhân
+          </h3>
+          
+          <p className="text-sm text-mystic-300 mb-4 leading-relaxed">
+            Vì bạn đang dùng ứng dụng ngoài AI Studio, bạn cần nhập <strong>Gemini API Key</strong> của riêng mình để sử dụng AI.
+          </p>
+
+          <div className="bg-mystic-800 p-4 rounded-xl border border-mystic-700 mb-6 space-y-3">
+             <ol className="list-decimal ml-4 text-xs text-mystic-200 space-y-2">
+                <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" className="text-mystic-accent underline font-bold">tại đây</a> để nhận Key miễn phí.</li>
+                <li>Dán mã Key vào ô bên dưới.</li>
+                <li>Nhấn "Lưu & Bắt đầu" để trải nghiệm.</li>
+             </ol>
+          </div>
+
+          <input 
+            type="password"
+            value={keyInput}
+            onChange={e => setKeyInput(e.target.value)}
+            placeholder="Dán API Key vào đây..."
+            className="w-full bg-black/40 border border-mystic-600 rounded-lg p-3 text-white placeholder:text-mystic-700 focus:border-mystic-accent outline-none mb-6 font-mono text-sm"
+          />
+
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setShowApiKeyModal(false)}
+              className="flex-1 py-3 border border-mystic-600 rounded-xl text-mystic-400 hover:bg-mystic-800 transition-all font-bold"
+            >
+              Hủy
+            </button>
+            <button 
+              onClick={handleSaveKey}
+              className="flex-[2] py-3 bg-mystic-accent text-mystic-900 rounded-xl font-bold hover:bg-yellow-500 transition-all shadow-lg"
+            >
+              Lưu & Bắt đầu
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const toggleMute = () => {
@@ -334,6 +413,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-mystic-900 text-gray-200 font-sans selection:bg-mystic-accent selection:text-mystic-900">
       {showInstallModal && <InstallModal />}
+      {showApiKeyModal && <ApiKeyModal />}
       
       {/* Sound Toggle Button (Fixed Position) */}
       <button 
