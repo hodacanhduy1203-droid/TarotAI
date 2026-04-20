@@ -8,9 +8,15 @@
     "build": "tsc && vite build",
     "start": "tsx server.ts",
     "lint": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "static-build": "vite build",
+    "cap:sync": "npm run static-build && npx cap sync",
+    "cap:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
     "@google/genai": "^1.49.0",
     "express": "^5.2.1",
     "lucide-react": "^0.263.1",
@@ -23,6 +29,8 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "rollup-plugin-javascript-obfuscator": "^1.0.4",
+    "terser": "^5.46.1",
     "tsx": "^4.21.0",
     "typescript": "^5.5.3",
     "vite": "^5.4.1"

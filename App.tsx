@@ -4,7 +4,7 @@ import { SpreadType, DrawnCard, TarotCardData } from './types';
 import { Card } from './components/Card';
 import { interpretReading } from './services/geminiService';
 import { soundService } from './services/soundService';
-import { Sparkles, RefreshCcw, Loader2, ArrowLeft, ScrollText, Download, X, MoreVertical, Share, ArrowUpRight, Globe, Copy, Check, Smartphone, Monitor, LogIn, Volume2, VolumeX, Key } from 'lucide-react';
+import { Sparkles, RefreshCcw, Loader2, ArrowLeft, ScrollText, Download, X, MoreVertical, Share, ArrowUpRight, Globe, Copy, Check, Smartphone, Monitor, LogIn, Volume2, VolumeX, Key, ShieldCheck, Info, Lock } from 'lucide-react';
 
 const App: React.FC = () => {
   const [view, setView] = useState<'home' | 'shuffling' | 'reading'>('home');
@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [isMobileUserAgent, setIsMobileUserAgent] = useState(false);
   const [hasSelectedKey, setHasSelectedKey] = useState(false);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   
   // Track the most recently revealed card to show its meaning immediately
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null);
@@ -161,6 +162,64 @@ const App: React.FC = () => {
               Lưu & Bắt đầu
             </button>
           </div>
+        </div>
+      </div>
+    );
+  };
+
+  const InfoModal = () => {
+    return (
+      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 animate-fadeIn backdrop-blur-md">
+        <div className="bg-mystic-900 border border-mystic-700 rounded-2xl w-full max-w-lg p-6 relative shadow-2xl flex flex-col max-h-[85vh]">
+          <button 
+            onClick={() => setShowInfoModal(false)}
+            className="absolute top-4 right-4 text-mystic-400 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <h3 className="text-xl font-serif font-bold text-mystic-accent mb-6 flex items-center gap-2 border-b border-mystic-800 pb-3">
+            <Info className="w-6 h-6" /> Thông tin ứng dụng
+          </h3>
+          
+          <div className="flex-grow overflow-y-auto custom-scrollbar pr-2 space-y-8">
+            <section>
+              <h4 className="text-mystic-accent font-bold mb-2 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4" /> Chính sách Bảo mật
+              </h4>
+              <div className="text-xs text-mystic-300 leading-relaxed space-y-2">
+                <p>1. <strong>Dữ liệu của bạn:</strong> Chúng tôi không thu thập thông tin cá nhân. Câu hỏi và kết quả rút bài của bạn không được lưu trữ trên máy chủ của chúng tôi.</p>
+                <p>2. <strong>API Key:</strong> Khi bạn nhập API Key cá nhân, nó được lưu trữ ngay tại trình duyệt của bạn (Local Storage) và chỉ được sử dụng để gọi trực tiếp dịch vụ Google Gemini. Chúng tôi không thể truy cập mã này.</p>
+                <p>3. <strong>Bảo mật:</strong> Ứng dụng sử dụng các phương thức mã hóa mã nguồn để bảo mật logic vận hành.</p>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="text-mystic-accent font-bold mb-2 flex items-center gap-2">
+                <Lock className="w-4 h-4" /> Điều khoản Sử dụng
+              </h4>
+              <div className="text-xs text-mystic-300 leading-relaxed space-y-2">
+                <p>1. <strong>Mục đích:</strong> Ứng dụng này chỉ mang tính chất giải trí và tham khảo. Kết quả từ AI không phải là lời khuyên mang tính pháp lý, y tế hay tài chính chuyên sâu.</p>
+                <p>2. <strong>Trách nhiệm:</strong> Người dùng chịu trách nhiệm về cách giải thích và áp dụng kết quả từ ứng dụng vào cuộc sống cá nhân.</p>
+                <p>3. <strong>Dịch vụ AI:</strong> Chất lượng câu trả lời phụ thuộc vào dịch vụ Google Gemini.</p>
+              </div>
+            </section>
+
+            <section className="bg-mystic-800/40 p-4 rounded-xl border border-mystic-700">
+               <h4 className="text-xs font-bold text-white mb-2">Thông tin phiên bản</h4>
+               <div className="flex justify-between text-[10px] text-mystic-400">
+                  <span>Phiên bản: 1.0.0 (Gold Master)</span>
+                  <span>Nhà phát triển: Mystic Studio</span>
+               </div>
+            </section>
+          </div>
+
+          <button 
+            onClick={() => setShowInfoModal(false)}
+            className="mt-6 w-full py-3 bg-mystic-accent text-mystic-900 rounded-xl font-bold hover:bg-yellow-500 transition-all shadow-lg text-sm"
+          >
+            Đóng
+          </button>
         </div>
       </div>
     );
@@ -414,6 +473,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-mystic-900 text-gray-200 font-sans selection:bg-mystic-accent selection:text-mystic-900">
       {showInstallModal && <InstallModal />}
       {showApiKeyModal && <ApiKeyModal />}
+      {showInfoModal && <InfoModal />}
       
       {/* Sound Toggle Button (Fixed Position) */}
       <button 
@@ -443,6 +503,15 @@ const App: React.FC = () => {
                   Tải App (APK/PWA)
                 </button>
                 
+                {/* Info Button */}
+                <button 
+                   onClick={() => setShowInfoModal(true)}
+                   className="px-4 py-2 bg-mystic-800/80 border border-mystic-600 rounded-full text-xs font-bold text-mystic-300 hover:bg-mystic-700 transition-all flex items-center gap-2 shadow-lg"
+                >
+                  <Info className="w-4 h-4" />
+                  Thông tin
+                </button>
+
                 {/* API Key / Account Button */}
                 <button 
                   onClick={handleConnectKey}
